@@ -1,5 +1,4 @@
 from flask import Flask
-import datetime
 
 # Database imports
 from .model.Model import configure as config_db
@@ -25,7 +24,11 @@ def create_app():
     manage = Manager(app)
     manage.add_command('db', MigrateCommand)
 
-    from .bussines.Bussines import bp_books
-    app.register_blueprint(bp_books)
+    # Import routes and controllers
+    from .bussines.Users import bp_users
+    app.register_blueprint(bp_users)
+
+    from .bussines.Comments import bp_comments
+    app.register_blueprint(bp_comments)
 
     return app

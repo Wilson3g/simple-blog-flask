@@ -11,8 +11,8 @@ def configure(app):
 # Serealization class
 class UserSchema(ma.Schema):
     class Meta:
-        model = User
+        fields = ('email', 'username', 'password')
 
 class CommentSchema(ma.Schema):
     class Meta:
-        model = Comment
+        fields = ('comment', 'created_at', 'updated_at', 'user_id')
