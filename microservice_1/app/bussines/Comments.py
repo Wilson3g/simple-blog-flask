@@ -19,6 +19,10 @@ def get_all_comments():
 @bp_comments.route('/comment/<int:id>', methods=['GET'])
 def get_comment(id):
     comment = Comment.query.get(id)
+
+    if comment is None:
+        return jsonify({'success': False, 'message': 'Comentário não encontrado!'})
+
     comment_by_id = comment_schema.dump(comment)
 
     return comment_by_id
@@ -27,9 +31,9 @@ def get_comment(id):
 def create_new_comment():
     now = datetime.datetime.now()
     data_comment_json = comment_schema.load(request.json)
-
-    # import ipdb; ipdb.set_trace()
-    # return {}, 200
+    
+    if len(data_comment_json) < 2 or '' in data_comment_json.values():
+        return jsonify({'success': False, 'message': 'Comentário não encontrado!'}), 401
 
     comment = data_comment_json['comment']
     created_at = (now.strftime("%Y-%m-%d %H:%M:%S"))
@@ -48,6 +52,12 @@ def update_comment(id):
     now = datetime.datetime.now()
 
     comment = Comment.query.get(id)
+
+    if not comment:
+        return jsonify({'success': False, 'message': 'Comentário não encontrado!'}), 401
+
+    if request.json['comment'] == '':
+        return jsonify({'success': False, 'message': 'Comentário vazio!'})
 
     comment.comment = request.json['comment']
     comment.updated_at = now.strftime("%Y-%m-%d %H:%M:%S")
