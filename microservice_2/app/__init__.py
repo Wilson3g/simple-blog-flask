@@ -8,17 +8,16 @@ api = Api(app)
 es = Elasticsearch('http://localhost:9200')
 
 class Post(Resource):
-    def get(self, query):
-
+    def get(self):
         posts = es.search(index='posts')
         return {'posts': posts['hits']['hits']}
-    
-    # def get(self, query):
-    #     posts = es.search(index='posts')
-    #     return {'posts': posts['hits']['hits']}
 
-    def post(self, query):
+    def post(self):
         now = str(datetime.date.today())
+        print(request.json.values())
+
+        if len(request.json) < 4 or '' in request.json.values():
+            return {'success': False, 'message': 'Informe todos os campos obrigatórios'}, 401
 
         id = request.json['user_id'],
         title = request.json['title'],
@@ -38,6 +37,19 @@ class Post(Resource):
         
         return {'success': True}, 201
 
+class ManipulatePosts(Resource):
+    def get(self, query):
+        body = {
+            "query": {
+                "multi_match": {
+                    "query": query,
+                }
+            }
+        }
+
+        posts = es.search(index='posts', body=body)
+        return {'posts': posts['hits']['hits']}
+
     def put(self, query):
         posts = es.search(index='posts')
         return {'posts': posts['hits']['hits']}
@@ -46,7 +58,8 @@ class Post(Resource):
         posts = es.search(index='posts')
         return {'posts': posts['hits']['hits']}
 
-api.add_resource(Post, '/post/<string:query>')
+api.add_resource(Post, '/post')
+api.add_resource(ManipulatePosts, '/post/<string:query>')
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
