@@ -31,4 +31,7 @@ def create_app():
     from .bussines.Comments import bp_comments
     app.register_blueprint(bp_comments)
 
+    from app.bussines.Posts import bp_comments
+    app.register_blueprint(bp_comments)
+
     return app

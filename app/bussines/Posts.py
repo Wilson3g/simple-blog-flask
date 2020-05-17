@@ -1,65 +1,61 @@
-from flask import Flask, request
-from flask_restful import Resource, Api
-from elasticsearch import Elasticsearch
-import datetime
+from flask import Blueprint, jsonify, request, current_app
+from app.model.Post import Post
+from app.config.database import configure as db
+from app.serealize.post_serealize import PostSchema
 
-app = Flask(__name__)
-api = Api(app)
-es = Elasticsearch('http://localhost:9200')
+bp_comments = Blueprint('posts', __name__)
 
-class Post(Resource):
-    def get(self):
-        posts = es.search(index='posts')
-        return {'posts': posts['hits']['hits']}
+post_schema = PostSchema()
+posts_schema = PostSchema(many=True)
 
-    def post(self):
-        now = str(datetime.date.today())
-        print(request.json.values())
 
-        if len(request.json) < 4 or '' in request.json.values():
-            return {'success': False, 'message': 'Informe todos os campos obrigatórios'}, 401
+@bp_comments.route('/post', methods=['GET'])
+def get_all_users():
+    all_posts = Post.query.all()
+    result = posts_schema.dump(all_posts)
 
-        id = request.json['user_id'],
-        title = request.json['title'],
-        content = request.json['content'],
-        author = request.json['author'],
+    return jsonify({'posts': result})
 
-        body = {
-            'id': id,
-            'title': title,
-            'content': content,
-            'author': author,
-            'created_at': now.replace('-', '/'),
-            'updated_at': now.replace('-', '/')
-        }
-        
-        posts = es.index(index='posts', op_type='create', body=body)
-        
-        return {'success': True}, 201
+@bp_comments.route('/post/<_id>', methods=['GET'])
+def find_post_by_id(_id):
+    post = Post.query.get(_id)
 
-class ManipulatePosts(Resource):
-    def get(self, query):
-        body = {
-            "query": {
-                "multi_match": {
-                    "query": query,
-                }
-            }
-        }
+    return jsonify({'success': True, 'post': post_schema.dump(post)})
 
-        posts = es.search(index='posts', body=body)
-        return {'posts': posts['hits']['hits']}
+@bp_comments.route('/post/search/<search>', methods=['GET'])
+def find_post_by_title(search):
+    post = Post.query.filter(Post.title.like('%' + search + '%' )).all()
 
-    def put(self, query):
-        posts = es.search(index='posts')
-        return {'posts': posts['hits']['hits']}
+    return jsonify({'message': 'sucess', 'posts': posts_schema.dump(post)})
 
-    def delete(self, query):
-        posts = es.search(index='posts')
-        return {'posts': posts['hits']['hits']}
 
-api.add_resource(Post, '/post')
-api.add_resource(ManipulatePosts, '/post/<string:query>')
+@bp_comments.route('/post', methods=['POST'])
+def save_new_post():
+    request_post = request.json
 
-if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    if len(request_post) < 3 or '' in request_post.values():
+        return jsonify({'success': False, 'message': 'Informe todos os campos'})
+
+    save = Post(title=request_post['title'], content=request_post['content'], author=request_post['author'])
+    current_app.db.session.add(save)
+    current_app.db.session.commit()
+
+    return jsonify({'sucess': True, 'message':'cadastrado com sucesso', 'post': post_schema.dump(save)})
+
+@bp_comments.route('/post/<id>', methods=['PUT'])
+def update_post(id):
+    post = Post.query.get(id)
+
+    if not post:
+        return jsonify({'success': None, 'message': 'Nenhum usuário encontrado'})
+
+    if len(request.json) < 3 or '' in request.json.values():
+        return jsonify({'success': True, 'message': 'Inform todos os dados'})
+
+    post.title = request.json['title']
+    post.content = request.json['content']
+    post.author = request.json['author']
+
+    current_app.db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Atualizado com sucess'})
