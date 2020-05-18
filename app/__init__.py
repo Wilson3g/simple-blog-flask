@@ -34,4 +34,7 @@ def create_app():
     from app.bussines.Posts import bp_comments
     app.register_blueprint(bp_comments)
 
+    from app.bussines.Tags import bp_tags
+    app.register_blueprint(bp_tags)
+
     return app

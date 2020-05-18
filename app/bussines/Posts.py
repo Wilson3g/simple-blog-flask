@@ -59,3 +59,15 @@ def update_post(id):
     current_app.db.session.commit()
 
     return jsonify({'success': True, 'message': 'Atualizado com sucess'})
+
+@bp_comments.route('/post/<_id>', methods=['DELETE'])
+def delete_post(_id):
+    post = Post.query.get(_id)
+
+    if not post:
+        return jsonify({'success': False, 'message': 'Nenhum usuário encontrado'})
+
+    current_app.db.session.delete(post)
+    current_app.db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Deletado com sucesso'})
