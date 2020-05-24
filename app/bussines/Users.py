@@ -64,16 +64,13 @@ def update_user(id):
 
     data_user_json = user_schema.load(request.json)
 
-    if len(data_user_json) < 3 or '' in data_user_json.values():
+    if len(data_user_json) < 1 or '' in data_user_json.values():
         return jsonify({
             'success': False,
             'message': 'Informe todos os dados'
         }), 401
 
-    user.email = data_user_json['email']
     user.username = data_user_json['username']
-    user.password = data_user_json['password']
-
     current_app.db.session.commit()
 
     return jsonify({'success': True}), 202

@@ -23,43 +23,40 @@ def find_post_by_id(_id):
 
 @bp_tags.route('/tags', methods=['POST'])
 def save_new_post():
-    request_post = request.json
+    request_tag = request.json
 
-    if len(request_post) < 1 or '' in request_post.values():
+    if len(request_tag) < 1 or '' in request_tag.values():
         return jsonify({'success': False, 'message': 'Informe todos os campos'})
-    print()
-    save = Tag(name=request_post['name'])
+
+    save = Tag(name=request_tag['name'])
     current_app.db.session.add(save)
     current_app.db.session.commit()
 
     return jsonify({'sucess': True, 'message':'cadastrado com sucesso', 'post': tag_schema.dump(save)})
 
-# @bp_comments.route('/post/<id>', methods=['PUT'])
-# def update_post(id):
-#     post = Post.query.get(id)
+@bp_tags.route('/tags/<id>', methods=['PUT'])
+def update_post(id):
+    tag = Tag.query.get(id)
 
-#     if not post:
-#         return jsonify({'success': None, 'message': 'Nenhum usuário encontrado'})
+    if not tag:
+        return jsonify({'success': None, 'message': 'Nenhum usuário encontrado'})
 
-#     if len(request.json) < 3 or '' in request.json.values():
-#         return jsonify({'success': True, 'message': 'Inform todos os dados'})
+    if len(request.json) < 1 or '' in request.json.values():
+        return jsonify({'success': True, 'message': 'Inform todos os dados'})
 
-#     post.title = request.json['title']
-#     post.content = request.json['content']
-#     post.author = request.json['author']
+    tag.name = request.json['name']
+    current_app.db.session.commit()
 
-#     current_app.db.session.commit()
+    return jsonify({'success': True, 'message': 'Atualizado com sucess'})
 
-#     return jsonify({'success': True, 'message': 'Atualizado com sucess'})
+@bp_tags.route('/tags/<_id>', methods=['DELETE'])
+def delete_tag(_id):
+    tag = Tag.query.get(_id)
 
-# @bp_comments.route('/post/<_id>', methods=['DELETE'])
-# def delete_post(_id):
-#     post = Post.query.get(_id)
+    if not tag:
+        return jsonify({'success': False, 'message': 'Nenhum usuário encontrado'})
 
-#     if not post:
-#         return jsonify({'success': False, 'message': 'Nenhum usuário encontrado'})
+    current_app.db.session.delete(tag)
+    current_app.db.session.commit()
 
-#     current_app.db.session.delete(post)
-#     current_app.db.session.commit()
-
-#     return jsonify({'success': True, 'message': 'Deletado com sucesso'})
+    return jsonify({'success': True, 'message': 'Deletado com sucesso'})

@@ -36,7 +36,11 @@ def save_new_post():
     if len(request_post) < 3 or '' in request_post.values():
         return jsonify({'success': False, 'message': 'Informe todos os campos'})
 
-    save = Post(title=request_post['title'], content=request_post['content'], author=request_post['author'])
+    save = Post(
+        title=request_post['title'], 
+        content=request_post['content'], 
+        author=request_post['author'])
+
     current_app.db.session.add(save)
     current_app.db.session.commit()
 
