@@ -1,16 +1,30 @@
 # simple-blog-flask(#development)
-A simple CRUD API blog with python(Flask), using microsservices architecture
+A simple CRUD API blog with python(Flask)
 
-microsservice_1
-Registration of users and comments using mysql and using ajax in update requests
+Registration of users and comments using mysql
 
-microsservice_2
-Registration and search of posts using ElasticSeach
+# Resources
+- Creation of users
+- Creation of posts
+- Search by post names and posts content
+- Creation of tags
 
-# Install
+
+# Requirements
+You need to use pipenv to run the project:
+```pip install pipenv```
+python 3.6 ^
+
+
 Create a virtual env with:
-```python3 -m venv venv``` and
-```source venv/bin/activate```
+```pipenv shell``` and
+```pipenv install```
 
-Install the dependences with:
-```pip install -r requirements.txt```
+Database:
+- This project run with MySQL
+- Create a database named ```simple_blog``` or rename the databases config in the ```__init__``` file
+- Run the migrations with: ```flask db migrate```
+- Create the tables with: ```flask db upgrade```
+
+Run project:
+```flask run```
