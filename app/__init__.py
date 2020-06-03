@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS, cross_origin
 
 # Database imports
 from app.config.database import configure as config_db
@@ -10,6 +11,8 @@ from app.config.serealize import configure as config_ma
 
 def create_app():
     app = Flask(__name__)
+
+    CORS(app)
 
     # DB Config
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost:3306/simple_blog'
