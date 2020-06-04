@@ -12,3 +12,22 @@ class Post(db.Model):
     is_active = db.Column(db.Boolean(), default=True)
     comment = db.relationship('Comment', backref="post")
     tags = db.relationship('Tag', secondary='posts_has_tags')
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    @classmethod
+    def search_by_id(cls, id):
+        return cls.query.get(id)
+
+    @classmethod
+    def get_all(cls):
+        return cls.query.all()
